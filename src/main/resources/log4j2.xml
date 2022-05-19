@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="warn" monitorInterval="60">
+    <Properties>
+        <!-- env:LOG_DIR looks for an environment variable named "LOG_DIR" which specifies where to save the logs.
+          If missing, will write logs to /var/log dir by default -->
+        <Property name="logDir">${env:LOG_DIR:-/var/log}</Property>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss,SSS} %-5level NA-AUTO [%t] %C{1.}.%M:%L: %msg%n%throwable</Property>
+        <!-- env:LOG4J_CONSOLE_LAYOUT looks for environment variable named "LOG4J_CONSOLE_LAYOUT" and expects one
+        of two values: "plain" or "color". If missing, uses default value "plain" -->
+        <Property name="CONSOLE_APPENDER_TO_USE">Console_${env:LOG4J_CONSOLE_LAYOUT:-plain}</Property>
+        <!-- Log pattern without color ANSI characters. Good for consoles that can't display colors. This is the default. -->
+        <Property name="LOG_PATTERN_FOR_CONSOLE_PLAIN">%d{yyyy-MM-dd HH:mm:ss,SSS} %-5level NA-AUTO [%t] %C{1.}.%M:%L: %msg%n%throwable</Property>
+        <!-- Log pattern with color ANSI characters. Good for consoles that can display colors.
+        Windows required extra shit to display console colors. -->
+        <Property name="LOG_PATTERN_FOR_CONSOLE_COLOR">%style{%d{yyyy-MM-dd HH:mm:ss,SSS}}{grey} %highlight{%-5level} NA-AUTO [%style{%t}{bright,blue}] %style{%C{1.}.%M:%L}{bright,yellow}: %msg%n%throwable</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console_color" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN_FOR_CONSOLE_COLOR}" disableAnsi="false"/>
+            <ThresholdFilter level="debug"/>
+        </Console>
+        <Console name="Console_plain" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN_FOR_CONSOLE_PLAIN}"/>
+            <ThresholdFilter level="debug"/>
+        </Console>
+        <RollingFile name="RollingFile"
+                     fileName="${logDir}/netapp-auto.log"
+                     filePattern="${logDir}/netapp-auto-%d{dd-MMM}-%i.log.gz"
+                     ignoreExceptions="false">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+            <ThresholdFilter level="info"/>
+        </RollingFile>
+        <RollingFile name="RollingFileDebug"
+                     fileName="${logDir}/netapp-auto.log.debug"
+                     filePattern="${logDir}/netapp-auto-%d{dd-MMM}-%i.log.debug.gz"
+                     ignoreExceptions="false">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+            <ThresholdFilter level="debug"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="${env:APP_LOG_LEVEL:-INFO}">
+            <AppenderRef ref="RollingFileDebug"/>
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="${CONSOLE_APPENDER_TO_USE}"/>
+        </Root>
+        <Logger name="com.tb.sh" level="${env:APP_LOG_LEVEL:-DEBUG}" additivity="true"/>
+        <Logger name="org.springframework.data.convert.CustomConversions" level="ERROR"/>
+    </Loggers>
+</Configuration>

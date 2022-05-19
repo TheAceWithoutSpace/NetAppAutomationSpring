@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="warn">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss,SSS} %-5level NA-AUTO [%t] %C{1.}.%M:%L: %msg%n%throwable</Property>
+        <Property name="LOG_PATTERN_FOR_CONSOLE">%style{%d{yyyy-MM-dd HH:mm:ss,SSS}}{grey} %highlight{%-5level} NA-AUTO [%style{%t}{bright,blue}] %style{%C{1.}.%M:%L}{bright,yellow}: %msg%n%throwable</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN_FOR_CONSOLE}"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="${env:TEST_LOG_LEVEL:-DEBUG}">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <Logger name="com.tb.sh" level="${env:TEST_LOG_LEVEL:-DEBUG}" additivity="true"/>
+    </Loggers>
+</Configuration>
